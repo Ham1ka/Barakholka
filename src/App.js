@@ -5,7 +5,12 @@ import ListingList from "./ListingList";
 import { API_BASE } from "./api";
 
 function App() {
-  const tg = window.Telegram ? window.Telegram.WebApp : null;
+  const tg = window.Telegram?.WebApp;
+  if (tg && tg.initData) {
+      alert("initData: " + tg.initData);
+  } else {
+      alert("Not running inside Telegram WebApp");
+  }
 
   const [listings, setListings] = useState([]);
 
