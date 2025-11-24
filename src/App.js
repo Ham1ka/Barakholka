@@ -5,8 +5,8 @@ import ListingList from "./ListingList";
 import { API_BASE } from "./api";
 
 function App() {
-  const tg = window.Telegram.WebApp;
-  
+  const tg = window.Telegram ? window.Telegram.WebApp : null;
+
   const [listings, setListings] = useState([]);
 
   const fetchListings = () => {
@@ -16,10 +16,14 @@ function App() {
   };
 
   useEffect(() => {
-      tg.ready(); // говорит телеге что mini app готова
+    if (tg) {
+      tg.ready(); // мини-апп готова
       console.log("Telegram WebApp:", tg);
+      tg.expand(); // разворачиваем максимальный размер
+    } else {
+      console.log("Not running inside Telegram WebApp");
+    }
   }, []);
-
 
   return (
     <div className="App">
