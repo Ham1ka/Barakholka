@@ -5,6 +5,8 @@ import ListingList from "./ListingList";
 import { API_BASE } from "./api";
 
 function App() {
+  const tg = window.Telegram.WebApp;
+  
   const [listings, setListings] = useState([]);
 
   const fetchListings = () => {
@@ -14,8 +16,10 @@ function App() {
   };
 
   useEffect(() => {
-    fetchListings();
+      tg.ready(); // говорит телеге что mini app готова
+      console.log("Telegram WebApp:", tg);
   }, []);
+
 
   return (
     <div className="App">
