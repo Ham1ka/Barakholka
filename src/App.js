@@ -34,11 +34,15 @@ function App() {
       <ListingList listings={listings} />
 
       <button onClick={() => {
-        const tg = window.Telegram.WebApp;
-        alert("initData: " + tg.initData);
+        if (window.Telegram && window.Telegram.WebApp) {
+          alert("initData: " + window.Telegram.WebApp.initData);
+        } else {
+          alert("Not running inside Telegram WebApp");
+        }
       }}>
         Проверить Telegram
       </button>
+
     </div>
   );
 }
