@@ -37,7 +37,7 @@ function App() {
         const tg = window.Telegram.WebApp;
         alert("initData: " + tg.initData);
       }}>
-        Проверить Telegram
+        Проверить Telegra
       </button>
     </div>
   );
