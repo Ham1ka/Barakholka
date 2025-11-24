@@ -32,6 +32,13 @@ function App() {
       <CreateListing onCreate={fetchListings} />
       <hr />
       <ListingList listings={listings} />
+
+      <button onClick={() => {
+        const tg = window.Telegram.WebApp;
+        alert("initData: " + tg.initData);
+      }}>
+        Проверить Telegram
+      </button>
     </div>
   );
 }
