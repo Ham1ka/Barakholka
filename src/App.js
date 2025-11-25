@@ -3,6 +3,8 @@ import Register from "./Register";
 import CreateListing from "./CreateListing";
 import ListingList from "./ListingList";
 import { API_BASE } from "./api";
+import AdminPanel from "./AdminPanel";
+
 
 function App() {
   const [debugInfo, setDebugInfo] = useState("Проверяю TG...");
@@ -42,6 +44,7 @@ function App() {
   }, []);
 
   return (
+    
     <div className="App">
       <p>Debug: {debugInfo}</p>
       {user ? (
@@ -52,6 +55,12 @@ function App() {
           <CreateListing onCreate={fetchListings} />
           <hr />
           <ListingList listings={listings} />
+          {user && user.id === 410430521 && (
+            <>
+              <hr />
+              <AdminPanel />
+            </>
+          )}
         </>
       ) : (
         <p>Не в TG Mini App. Запусти через бот!</p>
