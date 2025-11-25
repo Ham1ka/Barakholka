@@ -17,20 +17,26 @@ function App() {
   };
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      setDebugInfo("TG WebApp найден. Инициализирую...");
-      tg.ready();
-      tg.expand();
-      const initDataUnsafe = tg.initDataUnsafe || {};
-      if (initDataUnsafe.user) {
-        setUser(initDataUnsafe.user);
-        setDebugInfo(`TG User OK: ID ${initDataUnsafe.user.id}, Username ${initDataUnsafe.user.username || 'none'}`);
+    const script = document.createElement('script');
+    script.src = "https://telegram.org/js/telegram-web-app.js?59";
+    script.async = true;
+    document.head.appendChild(script);
+    script.onload = () => {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        setDebugInfo("TG WebApp найден. Инициализирую...");
+        tg.ready();
+        tg.expand();
+        const initDataUnsafe = tg.initDataUnsafe || {};
+        if (initDataUnsafe.user) {
+          setUser(initDataUnsafe.user);
+          setDebugInfo(`TG User OK: ID ${initDataUnsafe.user.id}, Username ${initDataUnsafe.user.username || 'none'}`);
+        } else {
+          setDebugInfo("TG найден, но нет user data в initDataUnsafe. Попробуй перезапустить бот или очистить кэш TG.");
+        }
       } else {
-        setDebugInfo("TG найден, но нет user data в initDataUnsafe. Попробуй перезапустить бот или очистить кэш TG.");
+        setDebugInfo("window.Telegram.WebApp не найден. Убедись, что app открыт внутри TG Mini App (не в браузере). Проверь BotFather settings.");
       }
-    } else {
-      setDebugInfo("window.Telegram.WebApp не найден. Убедись, что app открыт внутри TG Mini App (не в браузере). Проверь BotFather settings.");
     }
     fetchListings();
   }, []);
