@@ -5,36 +5,39 @@ import ListingList from "./ListingList";
 import { API_BASE } from "./api";
 
 function App() {
-  const tg = window.Telegram?.WebApp;
-  const [user, setUser] = useState(null); // Будем хранить TG user data
+  const [debugInfo, setDebugInfo] = useState("Проверяю TG...");
+  const [user, setUser] = useState(null);
   const [listings, setListings] = useState([]);
 
   const fetchListings = () => {
     fetch(`${API_BASE}/listings`)
       .then((res) => res.json())
       .then((data) => setListings(data))
-      .catch(err => console.error("Error fetching listings:", err));
+      .catch(err => setDebugInfo(`Ошибка listings: ${err.message}`));
   };
 
   useEffect(() => {
+    const tg = window.Telegram?.WebApp;
     if (tg) {
-      tg.ready(); // Готовы
-      tg.expand(); // Полный экран
-      const initDataUnsafe = tg.initDataUnsafe || {}; // Безопасно берём данные
+      setDebugInfo("TG WebApp найден. Инициализирую...");
+      tg.ready();
+      tg.expand();
+      const initDataUnsafe = tg.initDataUnsafe || {};
       if (initDataUnsafe.user) {
-        setUser(initDataUnsafe.user); // Сохраняем user (id, username, etc.)
-        console.log("TG User:", initDataUnsafe.user); // Для дебага в консоли
+        setUser(initDataUnsafe.user);
+        setDebugInfo(`TG User OK: ID ${initDataUnsafe.user.id}, Username ${initDataUnsafe.user.username || 'none'}`);
       } else {
-        console.log("No user data in initDataUnsafe");
+        setDebugInfo("TG найден, но нет user data в initDataUnsafe. Попробуй перезапустить бот или очистить кэш TG.");
       }
     } else {
-      console.log("Not in TG WebApp");
+      setDebugInfo("window.Telegram.WebApp не найден. Убедись, что app открыт внутри TG Mini App (не в браузере). Проверь BotFather settings.");
     }
-    fetchListings(); // Загружаем listings сразу
+    fetchListings();
   }, []);
 
   return (
     <div className="App">
+      <p>Debug: {debugInfo}</p>
       {user ? (
         <>
           <p>Привет, {user.username || "пользователь"}! (TG ID: {user.id})</p>
@@ -45,7 +48,7 @@ function App() {
           <ListingList listings={listings} />
         </>
       ) : (
-        <p>Запусти меня внутри Telegram Mini App!</p>
+        <p>Не в TG Mini App. Запусти через бот!</p>
       )}
     </div>
   );
