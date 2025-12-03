@@ -29,9 +29,12 @@ function App() {
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`HTTP error! status: ${res.status}, body: ${text}`);
+      }
       const data = await res.json();
-      console.log('Status response:', data); // Debug
+      console.log('Status response:', data);
       if (data.message === "Уже зарегистрирован" || data.message === "Заявка отправлена") {
         setUserStatus(data.status);
       } else {
@@ -45,7 +48,12 @@ function App() {
 
   const fetchPending = () => {
     fetch(`${API_BASE}/admin/pending?tg_id=${user.id}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
+        }
+        return res.json();
+      })
       .then(data => setPendingUsers(data))
       .catch(err => setDebugInfo(`Admin error: ${err.message}`));
   };
@@ -56,7 +64,12 @@ function App() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tg_id: user.id })
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
+        }
+        return res.json();
+      })
       .then(() => {
         fetchPending();
         fetchUserStatus();
