@@ -10,6 +10,7 @@ function App() {
   const [userStatus, setUserStatus] = useState(null);
   const [listings, setListings] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
+  const [pendingListings, setPendingListings] = useState([]);
 
   const fetchListings = () => {
     fetch(`${API_BASE}/listings`)
@@ -54,6 +55,18 @@ function App() {
       .catch(err => setDebugInfo(`Admin error: ${err.message}`));
   };
 
+  const fetchPendingListings = () => {
+    fetch(`${API_BASE}/admin/pending_listings?tg_id=${user.id}`)
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
+        }
+        return res.json();
+      })
+      .then(data => setPendingListings(data))
+      .catch(err => setDebugInfo(`Pending listings error: ${err.message}`));
+  };
+
   const approveUser = (id) => {
     fetch(`${API_BASE}/admin/approve/${id}`, {
       method: "POST",
@@ -71,6 +84,44 @@ function App() {
         fetchUserStatus();
       })
       .catch(err => setDebugInfo(`Approve error: ${err.message}`));
+  };
+
+  const approveListing = (id) => {
+    fetch(`${API_BASE}/admin/approve_listing/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tg_id: user.id })
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
+        }
+        return res.json();
+      })
+      .then(() => {
+        fetchPendingListings();
+        fetchListings();
+      })
+      .catch(err => setDebugInfo(`Approve listing error: ${err.message}`));
+  };
+
+  const deleteListing = (id) => {
+    fetch(`${API_BASE}/listings/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tg_id: user.id })
+    })
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
+        }
+        return res.json();
+      })
+      .then(() => {
+        fetchPendingListings();
+        fetchListings();
+      })
+      .catch(err => setDebugInfo(`Delete listing error: ${err.message}`));
   };
 
   useEffect(() => {
@@ -111,6 +162,7 @@ function App() {
   useEffect(() => {
     if (user && user.id === 410430521) {
       fetchPending();
+      fetchPendingListings();
     }
   }, [user]);
 
@@ -131,9 +183,9 @@ function App() {
       )}
       {userStatus === 'approved' && (
         <>
-          <CreateListing user={user} onCreate={fetchListings} />
+          <CreateListing user={user} onCreate={fetchUserStatus} />
           <hr />
-          <ListingList listings={listings} />
+          <ListingList listings={listings} user={user} onDelete={fetchListings} />
         </>
       )}
 
@@ -150,6 +202,23 @@ function App() {
                 <br />
                 <img src={`${API_BASE.replace('/api', '')}/${u.photo_path}`} alt="propusk" width="100" />
                 <button onClick={() => approveUser(u.id)}>Approve</button>
+              </li>
+            ))}
+          </ul>
+          <h2>Pending Listings</h2>
+          {pendingListings.length === 0 && <p>Нет объявлений на модерации</p>}
+          <ul>
+            {pendingListings.map(l => (
+              <li key={l.id}>
+                {l.title} by {l.username}
+                <p>{l.description}</p>
+                <div style={{ display: "flex", gap: "5px" }}>
+                  {l.images.map((img, idx) => (
+                    <img key={idx} src={`${API_BASE.replace('/api', '')}/${img}`} alt="" width="100" />
+                  ))}
+                </div>
+                <button onClick={() => approveListing(l.id)}>Approve</button>
+                <button onClick={() => deleteListing(l.id)}>Delete</button>
               </li>
             ))}
           </ul>

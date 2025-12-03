@@ -1,7 +1,20 @@
 import React from "react";
 import { API_BASE } from "./api";
 
-export default function ListingList({ listings }) {
+export default function ListingList({ listings, user, onDelete }) {
+  const handleDelete = (id) => {
+    if (window.confirm("Удалить объявление?")) {
+      fetch(`${API_BASE}/listings/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tg_id: user.id })
+      })
+        .then(res => res.json())
+        .then(() => onDelete())
+        .catch(err => console.error(err));
+    }
+  };
+
   return (
     <div>
       <h2>Лента объявлений</h2>
@@ -16,11 +29,12 @@ export default function ListingList({ listings }) {
               <img key={idx} src={`${API_BASE.replace('/api', '')}/${img}`} alt="" width="100" />
             ))}
           </div>
-          <button
-            onClick={() => window.open(`https://t.me/${listing.username}?text=Интересует объявление: ${listing.title}`, "_blank")}
-          >
+          <button onClick={() => window.open(`https://t.me/${listing.username}?text=Интересует объявление: ${listing.title}`, "_blank")}>
             Написать продавцу
           </button>
+          {listing.owner_tg_id === user.id && (
+            <button onClick={() => handleDelete(listing.id)}>Удалить</button>
+          )}
         </div>
       ))}
     </div>
