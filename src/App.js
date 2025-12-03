@@ -35,11 +35,7 @@ function App() {
       }
       const data = await res.json();
       console.log('Status response:', data);
-      if (data.message === "Уже зарегистрирован" || data.message === "Заявка отправлена") {
-        setUserStatus(data.status);
-      } else {
-        setUserStatus('not_registered');
-      }
+      setUserStatus(data.status || 'not_registered');
     } catch (err) {
       setDebugInfo(`Ошибка status: ${err.message}`);
       setUserStatus('not_registered');
