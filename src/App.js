@@ -7,7 +7,7 @@ import { API_BASE } from "./api";
 function App() {
   const [debugInfo, setDebugInfo] = useState("Проверяю TG...");
   const [user, setUser] = useState(null);
-  const [userStatus, setUserStatus] = useState(null); // null - loading, 'not_registered', 'pending', 'approved'
+  const [userStatus, setUserStatus] = useState(null);
   const [listings, setListings] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
 
@@ -23,16 +23,16 @@ function App() {
     const formData = new FormData();
     formData.append("tg_id", user.id);
     formData.append("username", user.username || '');
-    formData.append("dorm", ''); // Dummy
 
     try {
       const res = await fetch(`${API_BASE}/register`, {
         method: "POST",
         body: formData,
       });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
-      console.log('Status response:', data); // Для дебага в console TG
-      if (data.message === "Уже зарегистрирован") {
+      console.log('Status response:', data); // Debug
+      if (data.message === "Уже зарегистрирован" || data.message === "Заявка отправлена") {
         setUserStatus(data.status);
       } else {
         setUserStatus('not_registered');
@@ -100,10 +100,10 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-    if (user && user.id === 410430521 && userStatus && userStatus !== 'not_registered') { // Панель для админа, если registered
+    if (user && user.id === 410430521) {
       fetchPending();
     }
-  }, [userStatus, user]);
+  }, [user]);
 
   if (!user) return <p>{debugInfo}</p>;
 
@@ -114,7 +114,12 @@ function App() {
 
       {userStatus === null && <p>Загрузка статуса...</p>}
       {userStatus === 'not_registered' && <Register user={user} onRegister={fetchUserStatus} />}
-      {userStatus === 'pending' && <p>Твоя заявка на проверке у админа. Жди подтверждения.</p>}
+      {userStatus === 'pending' && (
+        <p>
+          Твоя заявка на проверке у админа. Жди подтверждения.
+          <button onClick={fetchUserStatus}>Обновить</button>
+        </p>
+      )}
       {userStatus === 'approved' && (
         <>
           <CreateListing user={user} onCreate={fetchListings} />
@@ -124,7 +129,7 @@ function App() {
       )}
 
       {/* Админ панель */}
-      {user && user.id === 410430521 && userStatus !== 'not_registered' && (
+      {user && user.id === 410430521 && (
         <div>
           <hr />
           <h2>Admin Panel (Pending Users)</h2>
