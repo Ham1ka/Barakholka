@@ -23,7 +23,7 @@ function App() {
     const formData = new FormData();
     formData.append("tg_id", user.id);
     formData.append("username", user.username || '');
-    formData.append("dorm", ''); // Dummy для check
+    formData.append("dorm", ''); // Dummy
 
     try {
       const res = await fetch(`${API_BASE}/register`, {
@@ -31,6 +31,7 @@ function App() {
         body: formData,
       });
       const data = await res.json();
+      console.log('Status response:', data); // Для дебага в console TG
       if (data.message === "Уже зарегистрирован") {
         setUserStatus(data.status);
       } else {
@@ -57,8 +58,8 @@ function App() {
     })
       .then(res => res.json())
       .then(() => {
-        fetchPending(); // Refresh pending
-        fetchUserStatus(); // Refresh own status if approving self
+        fetchPending();
+        fetchUserStatus();
       })
       .catch(err => setDebugInfo(`Approve error: ${err.message}`));
   };
@@ -79,15 +80,15 @@ function App() {
           setUser(initDataUnsafe.user);
           setDebugInfo(`TG User OK: ID ${initDataUnsafe.user.id}, Username ${initDataUnsafe.user.username || 'none'}`);
         } else {
-          setDebugInfo("TG найден, но нет user data в initDataUnsafe. Попробуй перезапустить бот или очистить кэш TG.");
+          setDebugInfo("TG найден, но нет user data.");
         }
       } else {
-        setDebugInfo("window.Telegram.WebApp не найден после load. Убедись, что app открыт внутри TG Mini App (не в браузере). Проверь BotFather settings.");
+        setDebugInfo("window.Telegram.WebApp не найден.");
       }
     };
 
     return () => {
-      document.head.removeChild(script); // Cleanup
+      document.head.removeChild(script);
     };
   }, []);
 
@@ -99,7 +100,7 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-    if (user && user.id === 410430521 && userStatus === 'approved') { // Твой ID из original, если 41043021 — замени
+    if (user && user.id === 410430521 && userStatus && userStatus !== 'not_registered') { // Панель для админа, если registered
       fetchPending();
     }
   }, [userStatus, user]);
@@ -123,7 +124,7 @@ function App() {
       )}
 
       {/* Админ панель */}
-      {user && user.id === 410430521 && (
+      {user && user.id === 410430521 && userStatus !== 'not_registered' && (
         <div>
           <hr />
           <h2>Admin Panel (Pending Users)</h2>
