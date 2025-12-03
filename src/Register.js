@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { API_BASE } from "./api";
 
-export default function Register() {
+export default function Register({ user, onRegister }) {
   const [dorm, setDorm] = useState("");
   const [photo, setPhoto] = useState(null);
   const [message, setMessage] = useState("");
@@ -11,13 +11,20 @@ export default function Register() {
     const formData = new FormData();
     formData.append("dorm", dorm);
     formData.append("photo", photo);
+    formData.append("tg_id", user.id);
+    formData.append("username", user.username || '');
 
-    const res = await fetch(`${API_BASE}/register`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    setMessage(data.message);
+    try {
+      const res = await fetch(`${API_BASE}/register`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      setMessage(data.message);
+      if (onRegister) onRegister(); // Refresh status
+    } catch (err) {
+      setMessage("Ошибка");
+    }
   };
 
   return (

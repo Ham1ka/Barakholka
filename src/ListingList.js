@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { API_BASE } from "./api";
 
 export default function ListingList({ listings }) {
@@ -13,11 +13,11 @@ export default function ListingList({ listings }) {
           <p>Тип: {listing.type} | Цена: {listing.price}</p>
           <div style={{ display: "flex", gap: "5px" }}>
             {listing.images.map((img, idx) => (
-              <img key={idx} src={`http://localhost:3000/${img}`} alt="" width="100" />
+              <img key={idx} src={`${API_BASE.replace('/api', '')}/${img}`} alt="" width="100" />
             ))}
           </div>
           <button
-            onClick={() => window.open(`https://t.me/username`, "_blank")}
+            onClick={() => window.open(`https://t.me/${listing.username}?text=Интересует объявление: ${listing.title}`, "_blank")}
           >
             Написать продавцу
           </button>
@@ -26,4 +26,3 @@ export default function ListingList({ listings }) {
     </div>
   );
 }
-

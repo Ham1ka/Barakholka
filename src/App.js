@@ -3,13 +3,13 @@ import Register from "./Register";
 import CreateListing from "./CreateListing";
 import ListingList from "./ListingList";
 import { API_BASE } from "./api";
-import AdminPanel from "./AdminPanel";
-
 
 function App() {
   const [debugInfo, setDebugInfo] = useState("Проверяю TG...");
   const [user, setUser] = useState(null);
+  const [userStatus, setUserStatus] = useState(null); // null - loading, 'not_registered', 'pending', 'approved'
   const [listings, setListings] = useState([]);
+  const [pendingUsers, setPendingUsers] = useState([]);
 
   const fetchListings = () => {
     fetch(`${API_BASE}/listings`)
@@ -18,52 +18,117 @@ function App() {
       .catch(err => setDebugInfo(`Ошибка listings: ${err.message}`));
   };
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "https://telegram.org/js/telegram-web-app.js?59";
-    script.async = true;
-    document.head.appendChild(script);
-    script.onload = () => {
-      const tg = window.Telegram?.WebApp;
-      if (tg) {
-        setDebugInfo("TG WebApp найден. Инициализирую...");
-        tg.ready();
-        tg.expand();
-        const initDataUnsafe = tg.initDataUnsafe || {};
-        if (initDataUnsafe.user) {
-          setUser(initDataUnsafe.user);
-          setDebugInfo(`TG User OK: ID ${initDataUnsafe.user.id}, Username ${initDataUnsafe.user.username || 'none'}`);
-        } else {
-          setDebugInfo("TG найден, но нет user data в initDataUnsafe. Попробуй перезапустить бот или очистить кэш TG.");
-        }
+  const fetchUserStatus = async () => {
+    if (!user) return;
+    const formData = new FormData();
+    formData.append("tg_id", user.id);
+    formData.append("username", user.username || '');
+    formData.append("dorm", ''); // Dummy для check
+
+    try {
+      const res = await fetch(`${API_BASE}/register`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.message === "Уже зарегистрирован") {
+        setUserStatus(data.status);
       } else {
-        setDebugInfo("window.Telegram.WebApp не найден. Убедись, что app открыт внутри TG Mini App (не в браузере). Проверь BotFather settings.");
+        setUserStatus('not_registered');
       }
+    } catch (err) {
+      setDebugInfo(`Ошибка status: ${err.message}`);
+      setUserStatus('not_registered');
     }
-    fetchListings();
+  };
+
+  const fetchPending = () => {
+    fetch(`${API_BASE}/admin/pending?tg_id=${user.id}`)
+      .then(res => res.json())
+      .then(data => setPendingUsers(data))
+      .catch(err => setDebugInfo(`Admin error: ${err.message}`));
+  };
+
+  const approveUser = (id) => {
+    fetch(`${API_BASE}/admin/approve/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tg_id: user.id })
+    })
+      .then(res => res.json())
+      .then(() => {
+        fetchPending(); // Refresh pending
+        fetchUserStatus(); // Refresh own status if approving self
+      })
+      .catch(err => setDebugInfo(`Approve error: ${err.message}`));
+  };
+
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      setDebugInfo("TG WebApp найден. Инициализирую...");
+      tg.ready();
+      tg.expand();
+      const initDataUnsafe = tg.initDataUnsafe || {};
+      if (initDataUnsafe.user) {
+        setUser(initDataUnsafe.user);
+        setDebugInfo(`TG User OK: ID ${initDataUnsafe.user.id}, Username ${initDataUnsafe.user.username || 'none'}`);
+      } else {
+        setDebugInfo("TG найден, но нет user data в initDataUnsafe. Попробуй перезапустить бот или очистить кэш TG.");
+      }
+    } else {
+      setDebugInfo("window.Telegram.WebApp не найден. Убедись, что app открыт внутри TG Mini App (не в браузере). Проверь BotFather settings.");
+    }
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      fetchUserStatus();
+      fetchListings();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user && user.id === 410430521 && userStatus === 'approved') { // Твой ID, замени если не твой
+      fetchPending();
+    }
+  }, [userStatus, user]);
+
+  if (!user) return <p>{debugInfo}</p>;
+
   return (
-    
     <div className="App">
       <p>Debug: {debugInfo}</p>
-      {user ? (
+      <p>Привет, {user.username || "пользователь"}! (TG ID: {user.id})</p>
+
+      {userStatus === null && <p>Загрузка статуса...</p>}
+      {userStatus === 'not_registered' && <Register user={user} onRegister={fetchUserStatus} />}
+      {userStatus === 'pending' && <p>Твоя заявка на проверке у админа. Жди подтверждения.</p>}
+      {userStatus === 'approved' && (
         <>
-          <p>Привет, {user.username || "пользователь"}! (TG ID: {user.id})</p>
-          <Register />
-          <hr />
-          <CreateListing onCreate={fetchListings} />
+          <CreateListing user={user} onCreate={fetchListings} />
           <hr />
           <ListingList listings={listings} />
-          {user && user.id === 410430521 && (
-            <>
-              <hr />
-              <AdminPanel />
-            </>
-          )}
         </>
-      ) : (
-        <p>Не в TG Mini App. Запусти через бот!</p>
+      )}
+
+      {/* Админ панель */}
+      {user && user.id === 410430521 && (
+        <div>
+          <hr />
+          <h2>Admin Panel (Pending Users)</h2>
+          {pendingUsers.length === 0 && <p>Нет заявок</p>}
+          <ul>
+            {pendingUsers.map(u => (
+              <li key={u.id}>
+                {u.username || "No username"} — {u.dorm}
+                <br />
+                <img src={`${API_BASE.replace('/api', '')}/${u.photo_path}`} alt="propusk" width="100" /> {/* Фикс src для localhost */}
+                <button onClick={() => approveUser(u.id)}>Approve</button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
