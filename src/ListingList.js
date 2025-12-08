@@ -78,6 +78,11 @@ export default function ListingList({ listings, user, onDelete }) {
             borderRadius: "5px"
           }}
         >
+        {listing.status === "pending" && listing.owner_tg_id === user.id && (
+          <div style={{ color: "orange", marginBottom: "8px" }}>
+            На модерации
+          </div>
+        )}
           <h3>{listing.title}</h3>
 
           {/* Категории */}
@@ -119,13 +124,16 @@ export default function ListingList({ listings, user, onDelete }) {
             Написать продавцу
           </button>
 
-          {/* ЕСЛИ ВЛАДЕЛЕЦ — МОЖНО УДАЛИТЬ */}
           {listing.owner_tg_id === user.id && (
-            <button
-              onClick={() => handleDelete(listing.id)}
-              style={{ marginLeft: "10px", backgroundColor: "#ff6666" }}
-            >
+            <button onClick={() => onDelete(listing.id)}>
               Удалить
+            </button>
+          )}
+
+          {user.id === 410430521 && (
+            <button style={{marginLeft: 10, background: "red", color: "white"}}
+              onClick={() => onDelete(listing.id)}>
+              Удалить (Админ)
             </button>
           )}
         </div>

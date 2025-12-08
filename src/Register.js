@@ -20,6 +20,12 @@ export default function Register({ user, onRegister }) {
         body: formData,
       });
       const data = await res.json();
+      if (data.status === 'declined') {
+        alert("Ваша заявка отклонена.\nПричина: " + (data.decline_reason || "не указана"));
+      }
+      if (data.status === 'blocked') {
+        alert("Вы заблокированы.\nПричина: " + (data.block_reason || "не указана"));
+      }
       setMessage(data.message);
       if (onRegister) onRegister(); // Refresh status
     } catch (err) {
@@ -44,6 +50,11 @@ export default function Register({ user, onRegister }) {
           required
         />
         <button type="submit">Отправить</button>
+        {status === "declined" && (
+          <button type="button" onClick={() => onRegister()}>
+            Отправить заявку заново
+          </button>
+        )}
       </form>
       {message && <p>{message}</p>}
     </div>

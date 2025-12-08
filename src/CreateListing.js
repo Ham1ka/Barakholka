@@ -27,6 +27,18 @@ export default function CreateListing({ user, onCreate }) {
     formData.append("type", type);
     formData.append("price", price);
     formData.append("categories", JSON.stringify(categories));
+    if (userStatus === "blocked") {
+      alert("Вы заблокированы и не можете создавать объявления.");
+      return;
+    }
+    if (userStatus === "declined") {
+      alert("Ваша регистрация отклонена. Вы не можете создавать объявления.");
+      return;
+    }
+    if (userStatus === "pending") {
+      alert("Ваша заявка ещё не одобрена.");
+      return;
+    }
 
     for (let i = 0; i < photos.length; i++) {
       formData.append("photos", photos[i]);

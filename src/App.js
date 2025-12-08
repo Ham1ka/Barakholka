@@ -4,21 +4,33 @@ import CreateListing from "./CreateListing";
 import ListingList from "./ListingList";
 import { API_BASE } from "./api";
 
+const ADMIN_TG_ID = 410430521;
+// Поставь здесь юзернейм админа, чтобы кнопка "Связаться с админом" работала.
+// Если не знаешь — оставь пустым и кнопка просто покажет id в alert.
+const ADMIN_USERNAME = "@youarenoname";
+
 function App() {
   const [debugInfo, setDebugInfo] = useState("Проверяю TG...");
-  const [user, setUser] = useState(null);
-  const [userStatus, setUserStatus] = useState(null);
+  const [user, setUser] = useState(null); // tg initDataUnsafe.user
+  const [userStatus, setUserStatus] = useState(null); // 'not_registered' | 'pending' | 'approved' | 'declined' | 'blocked'
+  const [blockReason, setBlockReason] = useState(null);
   const [listings, setListings] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingListings, setPendingListings] = useState([]);
 
+  // Получаем ленту (теперь с ?tg_id= чтобы бэкенд отфильтровал dorm)
   const fetchListings = () => {
-    fetch(`${API_BASE}/listings`)
-      .then((res) => res.json())
+    if (!user) return;
+    fetch(`${API_BASE}/listings?tg_id=${user.id}`)
+      .then((res) => {
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
+        return res.json();
+      })
       .then((data) => setListings(data))
       .catch(err => setDebugInfo(`Ошибка listings: ${err.message}`));
   };
 
+  // Проверка/регистрация пользователя (возвращает статус)
   const fetchUserStatus = async () => {
     if (!user) return;
     const formData = new FormData();
@@ -37,36 +49,38 @@ function App() {
       const data = await res.json();
       console.log('Status response:', data);
       setUserStatus(data.status || 'not_registered');
+      setBlockReason(data.block_reason || null);
     } catch (err) {
       setDebugInfo(`Ошибка status: ${err.message}`);
       setUserStatus('not_registered');
     }
   };
 
+  // Admin: pending users
   const fetchPending = () => {
+    if (!user) return;
     fetch(`${API_BASE}/admin/pending?tg_id=${user.id}`)
       .then(res => {
-        if (!res.ok) {
-          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
-        }
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
         return res.json();
       })
       .then(data => setPendingUsers(data))
       .catch(err => setDebugInfo(`Admin error: ${err.message}`));
   };
 
+  // Admin: pending listings
   const fetchPendingListings = () => {
+    if (!user) return;
     fetch(`${API_BASE}/admin/pending_listings?tg_id=${user.id}`)
       .then(res => {
-        if (!res.ok) {
-          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
-        }
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
         return res.json();
       })
       .then(data => setPendingListings(data))
       .catch(err => setDebugInfo(`Pending listings error: ${err.message}`));
   };
 
+  // Admin actions for users
   const approveUser = (id) => {
     fetch(`${API_BASE}/admin/approve/${id}`, {
       method: "POST",
@@ -74,18 +88,70 @@ function App() {
       body: JSON.stringify({ tg_id: user.id })
     })
       .then(res => {
-        if (!res.ok) {
-          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
-        }
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
         return res.json();
       })
       .then(() => {
         fetchPending();
-        fetchUserStatus();
       })
       .catch(err => setDebugInfo(`Approve error: ${err.message}`));
   };
 
+  const declineUser = (id) => {
+    if (!window.confirm("Отклонить заявку пользователя?")) return;
+    fetch(`${API_BASE}/admin/decline/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tg_id: user.id })
+    })
+      .then(res => {
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
+        return res.json();
+      })
+      .then(() => fetchPending())
+      .catch(err => setDebugInfo(`Decline error: ${err.message}`));
+  };
+
+  const blockUser = (id) => {
+    const reason = window.prompt("Причина блокировки (необязательно):", "");
+    if (!window.confirm("Заблокировать пользователя?")) return;
+    fetch(`${API_BASE}/admin/block_user/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tg_id: user.id, reason })
+    })
+      .then(res => {
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
+        return res.json();
+      })
+      .then(() => {
+        fetchPending();
+        fetchPendingListings();
+        fetchListings();
+      })
+      .catch(err => setDebugInfo(`Block error: ${err.message}`));
+  };
+
+  const unblockUser = (id) => {
+    if (!window.confirm("Разблокировать пользователя?")) return;
+    fetch(`${API_BASE}/admin/unblock_user/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tg_id: user.id })
+    })
+      .then(res => {
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
+        return res.json();
+      })
+      .then(() => {
+        fetchPending();
+        fetchPendingListings();
+        fetchListings();
+      })
+      .catch(err => setDebugInfo(`Unblock error: ${err.message}`));
+  };
+
+  // Admin actions for listings
   const approveListing = (id) => {
     fetch(`${API_BASE}/admin/approve_listing/${id}`, {
       method: "POST",
@@ -93,9 +159,7 @@ function App() {
       body: JSON.stringify({ tg_id: user.id })
     })
       .then(res => {
-        if (!res.ok) {
-          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
-        }
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
         return res.json();
       })
       .then(() => {
@@ -106,15 +170,14 @@ function App() {
   };
 
   const deleteListing = (id) => {
+    // for owner or admin
     fetch(`${API_BASE}/listings/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tg_id: user.id })
     })
       .then(res => {
-        if (!res.ok) {
-          return res.text().then(text => { throw new Error(`HTTP error! status: ${res.status}, body: ${text}`); });
-        }
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
         return res.json();
       })
       .then(() => {
@@ -124,6 +187,7 @@ function App() {
       .catch(err => setDebugInfo(`Delete listing error: ${err.message}`));
   };
 
+  // Init Telegram WebApp
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://telegram.org/js/telegram-web-app.js?59";
@@ -152,6 +216,7 @@ function App() {
     };
   }, []);
 
+  // После получения user — проверяем статус и грузим ленту
   useEffect(() => {
     if (user) {
       fetchUserStatus();
@@ -159,71 +224,172 @@ function App() {
     }
   }, [user]);
 
+  // Если админ — подгружаем страницы модерации
   useEffect(() => {
-    if (user && user.id === 410430521) {
+    if (user && user.id === ADMIN_TG_ID) {
       fetchPending();
       fetchPendingListings();
     }
   }, [user]);
 
+  // UI рендер для разных статусов
   if (!user) return <p>{debugInfo}</p>;
 
+  // BLOCKED screen
+  if (userStatus === 'blocked') {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Ваша учётная запись заблокирована</h2>
+        {blockReason && <p><strong>Причина:</strong> {blockReason}</p>}
+        <p>Если считаете, что это ошибка — свяжитесь с администратором.</p>
+        <div style={{ marginTop: 12 }}>
+          {ADMIN_USERNAME
+            ? <button onClick={() => window.open(`https://t.me/${ADMIN_USERNAME}`, "_blank")}>Связаться с админом</button>
+            : <button onClick={() => alert(`Свяжитесь с админом: TG ID ${ADMIN_TG_ID}`)}>Связаться с админом</button>
+          }
+        </div>
+      </div>
+    );
+  }
+
+  // DECLINED screen — показать причину (если есть) и дать форму регистрации заново
+  if (userStatus === 'declined') {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Заявка отклонена</h2>
+        <p>Ваша регистрация не прошла модерацию. Попробуйте отправить заявку заново.</p>
+        <Register user={user} onRegister={fetchUserStatus} />
+      </div>
+    );
+  }
+
+  // NOT REGISTERED -> show Register
+  if (userStatus === 'not_registered') {
+    return (
+      <div style={{ padding: 20 }}>
+        <p>Тебя не нашли в базе — пожалуйста, зарегистрируйся:</p>
+        <Register user={user} onRegister={fetchUserStatus} />
+      </div>
+    );
+  }
+
+  // PENDING -> show message + option to refresh
+  if (userStatus === 'pending') {
+    return (
+      <div style={{ padding: 20 }}>
+        <p>Твоя заявка на проверке у админа. Жди подтверждения.</p>
+        <button onClick={fetchUserStatus}>Обновить статус</button>
+      </div>
+    );
+  }
+
+  // APPROVED and everything else (default) -> main app
   return (
-    <div className="App">
+    <div className="App" style={{ padding: 20 }}>
       <p>Debug: {debugInfo}</p>
       <p>Привет, {user.username || "пользователь"}! (TG ID: {user.id})</p>
 
-      {userStatus === null && <p>Загрузка статуса...</p>}
-      {userStatus === 'not_registered' && <Register user={user} onRegister={fetchUserStatus} />}
-      {userStatus === 'pending' && (
-        <p>
-          Твоя заявка на проверке у админа. Жди подтверждения.
-          <button onClick={fetchUserStatus}>Обновить</button>
-        </p>
-      )}
+      {/* Create + feed */}
       {userStatus === 'approved' && (
         <>
-          <CreateListing user={user} onCreate={fetchUserStatus} />
+          <CreateListing user={user} onCreate={() => { fetchListings(); }} />
           <hr />
-          <ListingList listings={listings} user={user} onDelete={fetchListings} />
+          <ListingList listings={listings} user={user} onDelete={() => fetchListings()} />
         </>
       )}
 
-      {/* Админ панель */}
-      {user && user.id === 410430521 && (
-        <div>
+      {/* Admin panel */}
+      {user && user.id === ADMIN_TG_ID && (
+        <div style={{ marginTop: 30 }}>
           <hr />
-          <h2>Admin Panel (Pending Users)</h2>
+          <h2>Admin Panel — Pending Users</h2>
           {pendingUsers.length === 0 && <p>Нет заявок</p>}
           <ul>
             {pendingUsers.map(u => (
-              <li key={u.id}>
-                {u.username || "No username"} — {u.dorm}
-                <br />
-                <img src={`${API_BASE.replace('/api', '')}/${u.photo_path}`} alt="propusk" width="100" />
-                <button onClick={() => approveUser(u.id)}>Approve</button>
+              <li key={u.id} style={{ marginBottom: 12 }}>
+                <div>
+                  <strong>{u.username || "No username"}</strong> — {u.dorm} (id: {u.id})
+                </div>
+                {u.photo_path && (
+                  <div>
+                    <img src={`${API_BASE.replace('/api', '')}/${u.photo_path}`} alt="propusk" width="100" />
+                  </div>
+                )}
+                <div style={{ marginTop: 6 }}>
+                  <button onClick={() => approveUser(u.id)} style={{ marginRight: 8 }}>Approve</button>
+                  <button onClick={() => declineUser(u.id)} style={{ marginRight: 8 }}>Decline</button>
+                  <button onClick={() => blockUser(u.id)} style={{ marginRight: 8 }}>Block</button>
+                </div>
               </li>
             ))}
           </ul>
-          <h2>Pending Listings</h2>
+
+          <h2 style={{ marginTop: 20 }}>Pending Listings</h2>
           {pendingListings.length === 0 && <p>Нет объявлений на модерации</p>}
           <ul>
             {pendingListings.map(l => (
-              <li key={l.id}>
-                {l.title} by {l.username}
+              <li key={l.id} style={{ marginBottom: 12 }}>
+                <div><strong>{l.title}</strong> by {l.username}</div>
                 <p>{l.description}</p>
-                <div style={{ display: "flex", gap: "5px" }}>
+                <div style={{ display: "flex", gap: "5px", marginBottom: 6 }}>
                   {l.images.map((img, idx) => (
                     <img key={idx} src={`${API_BASE.replace('/api', '')}/${img}`} alt="" width="100" />
                   ))}
                 </div>
-                <button onClick={() => approveListing(l.id)}>Approve</button>
-                <button onClick={() => deleteListing(l.id)}>Delete</button>
+                <div>
+                  <button onClick={() => approveListing(l.id)} style={{ marginRight: 8 }}>Approve</button>
+                  <button onClick={() => deleteListing(l.id)} style={{ marginRight: 8 }}>Delete</button>
+                </div>
               </li>
             ))}
           </ul>
+
+          <h2 style={{ marginTop: 20 }}>All Users (manage)</h2>
+          <p>Список всех пользователей (админская функция для поиска/блокировки).</p>
+          <ManageUsersPanel adminTg={user.id} onBlock={blockUser} onUnblock={unblockUser} onRefresh={fetchPending} />
         </div>
       )}
+    </div>
+  );
+}
+
+// Вспомогательный простой компонент для управления (админ)
+function ManageUsersPanel({ adminTg, onBlock, onUnblock, onRefresh }) {
+  const [users, setUsers] = useState([]);
+  const [debug, setDebug] = useState("");
+
+  const fetchAll = () => {
+    fetch(`${API_BASE}/admin/all_users?tg_id=${adminTg}`)
+      .then(res => {
+        if (!res.ok) return res.text().then(t => { throw new Error(`HTTP error! status: ${res.status}, body: ${t}`); });
+        return res.json();
+      })
+      .then(data => setUsers(data))
+      .catch(err => setDebug(`Fetch users err: ${err.message}`));
+  };
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
+
+  return (
+    <div>
+      <button onClick={() => { fetchAll(); onRefresh && onRefresh(); }}>Refresh users</button>
+      {debug && <p>{debug}</p>}
+      <ul>
+        {users.map(u => (
+          <li key={u.id} style={{ marginBottom: 8 }}>
+            {u.username || "No username"} — {u.dorm} — {u.status}
+            <div style={{ marginTop: 6 }}>
+              {u.status !== 'blocked' ? (
+                <button onClick={() => onBlock(u.id)} style={{ marginRight: 8 }}>Block</button>
+              ) : (
+                <button onClick={() => onUnblock(u.id)} style={{ marginRight: 8 }}>Unblock</button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
