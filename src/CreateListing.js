@@ -10,6 +10,7 @@ const CATEGORY_OPTIONS = [
 ];
 
 export default function CreateListing({ user, onCreate }) {
+  const userStatus = user?.status;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("Продать");

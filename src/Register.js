@@ -50,7 +50,7 @@ export default function Register({ user, onRegister }) {
           required
         />
         <button type="submit">Отправить</button>
-        {status === "declined" && (
+        {user?.status === "declined" && (
           <button type="button" onClick={() => onRegister()}>
             Отправить заявку заново
           </button>
