@@ -171,7 +171,7 @@ function App() {
 
   const deleteListing = (id) => {
     // for owner or admin
-    fetch(`${API_BASE}/listings/${id}`, {
+    fetch(`${API_BASE}/listing/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tg_id: user.id })
