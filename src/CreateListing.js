@@ -6,7 +6,7 @@ const CATEGORY_OPTIONS = [
   { id: "electronics", label: "Электроника" },
   { id: "food", label: "Продовольствие" },
   { id: "services", label: "Услуги" },
-  { id: "other", label: "Другое" }
+  { id: "other", label: "Другое" },
 ];
 
 export default function CreateListing({ user, onCreate }) {
@@ -28,6 +28,7 @@ export default function CreateListing({ user, onCreate }) {
     formData.append("type", type);
     formData.append("price", price);
     formData.append("categories", JSON.stringify(categories));
+
     if (userStatus === "blocked") {
       alert("Вы заблокированы и не можете создавать объявления.");
       return;
@@ -41,7 +42,7 @@ export default function CreateListing({ user, onCreate }) {
       return;
     }
 
-    for (let i = 0; i < photos.length; i++) {
+    for (let i = 0; i < photos.length; i += 1) {
       formData.append("photos", photos[i]);
     }
 
@@ -53,53 +54,108 @@ export default function CreateListing({ user, onCreate }) {
       const data = await res.json();
       setMessage(data.message || data.error);
       if (res.ok && onCreate) onCreate();
-      setTitle(""); setDescription(""); setType("Продать"); setPrice(""); setPhotos([]); setCategories([]);
+      setTitle("");
+      setDescription("");
+      setType("Продать");
+      setPrice("");
+      setPhotos([]);
+      setCategories([]);
     } catch (err) {
       setMessage("Ошибка");
     }
   };
 
   return (
-    <div>
-      <h2>Создать объявление</h2>
+    <div className="form-card">
+      <h3 className="form-title">Новое объявление</h3>
       <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label className="form-label">Заголовок</label>
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Например: Продам ноутбук"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
 
-        <input type="text" placeholder="Заголовок" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <textarea placeholder="Описание" value={description} onChange={(e) => setDescription(e.target.value)} required />
-        
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option>Продать</option>
-          <option>Обменять</option>
-        </select>
+        <div className="form-group">
+          <label className="form-label">Описание</label>
+          <textarea
+            className="form-textarea"
+            placeholder="Состояние, комплектация, условия встречи..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+        </div>
 
-        <input type="text" placeholder="Цена" value={price} onChange={(e) => setPrice(e.target.value)} />
+        <div className="form-group">
+          <label className="form-label">Тип объявления</label>
+          <select
+            className="form-select"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          >
+            <option>Продать</option>
+            <option>Обменять</option>
+          </select>
+        </div>
 
-        {/* 🔥 ВОТ ЭТО — КАТЕГОРИИ 🔥 */}
-        <h4>Категории</h4>
-        {CATEGORY_OPTIONS.map(cat => (
-          <label key={cat.id} style={{ display: "block" }}>
-            <input
-              type="checkbox"
-              value={cat.id}
-              checked={categories.includes(cat.id)}
-              onChange={(e) => {
-                const value = e.target.value;
-                setCategories(prev =>
-                  prev.includes(value)
-                    ? prev.filter(c => c !== value)
-                    : [...prev, value]
-                );
-              }}
-            />
-            {cat.label}
-          </label>
-        ))}
+        <div className="form-group">
+          <label className="form-label">Цена (можно оставить пустым)</label>
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Например: 15000 ₽"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+        </div>
 
-        <input type="file" multiple onChange={(e) => setPhotos(e.target.files)} />
+        <div className="form-group">
+          <label className="form-label">Категории</label>
+          <div className="pill-checkbox-row">
+            {CATEGORY_OPTIONS.map((cat) => (
+              <label key={cat.id} className="pill-checkbox">
+                <input
+                  type="checkbox"
+                  value={cat.id}
+                  checked={categories.includes(cat.id)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCategories((prev) =>
+                      prev.includes(value)
+                        ? prev.filter((c) => c !== value)
+                        : [...prev, value],
+                    );
+                  }}
+                />
+                <span>{cat.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
 
-        <button type="submit">Создать</button>
+        <div className="form-group">
+          <label className="form-label">Фото товара</label>
+          <input
+            type="file"
+            className="form-file-input"
+            multiple
+            onChange={(e) => setPhotos(e.target.files)}
+          />
+        </div>
+
+        <div className="form-actions">
+          <button type="submit" className="btn-primary">
+            Создать
+          </button>
+        </div>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p className="app-debug">{message}</p>}
     </div>
   );
 }

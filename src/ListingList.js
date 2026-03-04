@@ -7,21 +7,21 @@ const CATEGORY_OPTIONS = [
   { id: "electronics", label: "Электроника" },
   { id: "food", label: "Продовольствие" },
   { id: "services", label: "Услуги" },
-  { id: "other", label: "Другое" }
+  { id: "other", label: "Другое" },
 ];
 
 export default function ListingList({ listings, user, onDelete }) {
   const [filterCategories, setFilterCategories] = useState([]);
 
   // ФИЛЬТРАЦИЯ
-  const filteredListings = listings.filter(listing => {
+  const filteredListings = listings.filter((listing) => {
     if (!listing.categories) return true;
 
     // если фильтры не выбраны → показать всё
     if (filterCategories.length === 0) return true;
 
     // показать если совпадает хотя бы 1 категория
-    return listing.categories.some(c => filterCategories.includes(c));
+    return listing.categories.some((c) => filterCategories.includes(c));
   });
 
   const handleDelete = (id) => {
@@ -29,115 +29,137 @@ export default function ListingList({ listings, user, onDelete }) {
       fetch(`${API_BASE}/listings/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tg_id: user.id })
+        body: JSON.stringify({ tg_id: user.id }),
       })
-        .then(res => res.json())
+        .then((res) => res.json())
         .then(() => onDelete())
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     }
+  };
+
+  const openChat = (listing) => {
+    const text = encodeURIComponent(
+      `Интересует объявление: ${listing.title}`,
+    );
+    window.open(`https://t.me/${listing.username}?text=${text}`, "_blank");
   };
 
   return (
     <div>
-      <h2>Лента объявлений</h2>
-
-      {/* 🔥 ФИЛЬТРЫ ПО КАТЕГОРИЯМ */}
-      <div style={{ marginBottom: "15px" }}>
-        <h3>Фильтры</h3>
-
-        {CATEGORY_OPTIONS.map(cat => (
-          <label key={cat.id} style={{ marginRight: "12px" }}>
-            <input
-              type="checkbox"
-              value={cat.id}
-              checked={filterCategories.includes(cat.id)}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFilterCategories(prev =>
-                  prev.includes(value)
-                    ? prev.filter(c => c !== value)
-                    : [...prev, value]
-                );
-              }}
-            />
-            {cat.label}
-          </label>
-        ))}
+      <div style={{ marginBottom: 10, textAlign: "left" }}>
+        <div className="market-filters-title">Фильтр по категориям</div>
+        <div className="pill-checkbox-row">
+          {CATEGORY_OPTIONS.map((cat) => (
+            <label key={cat.id} className="pill-checkbox">
+              <input
+                type="checkbox"
+                value={cat.id}
+                checked={filterCategories.includes(cat.id)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFilterCategories((prev) =>
+                    prev.includes(value)
+                      ? prev.filter((c) => c !== value)
+                      : [...prev, value],
+                  );
+                }}
+              />
+              <span>{cat.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
-      {/* 🔥 ЛЕНТА (ФИЛЬТРОВАННАЯ) */}
-      {filteredListings.length === 0 && <p>Нет объявлений по выбранным фильтрам</p>}
+      {filteredListings.length === 0 && (
+        <p className="market-empty">Нет объявлений по выбранным фильтрам</p>
+      )}
 
-      {filteredListings.map(listing => (
-        <div
-          key={listing.id}
-          style={{
-            border: "1px solid #ccc",
-            margin: "10px 0",
-            padding: "10px",
-            borderRadius: "5px"
-          }}
-        >
-        {listing.status === "pending" && listing.owner_tg_id === user.id && (
-          <div style={{ color: "orange", marginBottom: "8px" }}>
-            На модерации
-          </div>
-        )}
-          <h3>{listing.title}</h3>
+      <div className="market-grid">
+        {filteredListings.map((listing) => {
+          const isOwner = listing.owner_tg_id === user.id;
+          const isAdmin = user.id === 410430521;
+          const showPendingBadge =
+            listing.status === "pending" && listing.owner_tg_id === user.id;
+          const priceLabel = listing.price || "Цена по договоренности";
 
-          {/* Категории */}
-          {listing.categories && listing.categories.length > 0 && (
-            <p>
-              Категории:{" "}
-              {listing.categories
-                .map(catId => CATEGORY_OPTIONS.find(c => c.id === catId)?.label)
-                .join(", ")}
-            </p>
-          )}
+          return (
+            <div
+              key={listing.id}
+              className="product-card"
+              onClick={() => openChat(listing)}
+            >
+              {listing.images && listing.images.length > 0 && (
+                <img
+                  className="product-image"
+                  src={`${API_BASE.replace("/api", "")}/${listing.images[0]}`}
+                  alt={listing.title}
+                />
+              )}
 
-          <p>{listing.description}</p>
-          <p>Тип: {listing.type} | Цена: {listing.price}</p>
+              <div className="product-title">{listing.title}</div>
+              <div className="product-price">{priceLabel}</div>
 
-          {/* ФОТО */}
-          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
-            {listing.images.map((img, idx) => (
-              <img
-                key={idx}
-                src={`${API_BASE.replace("/api", "")}/${img}`}
-                alt=""
-                width="100"
-                style={{ borderRadius: "4px" }}
-              />
-            ))}
-          </div>
+              {showPendingBadge && (
+                <div
+                  className="status-chip status-chip-pending"
+                  style={{ marginBottom: 4 }}
+                >
+                  На модерации
+                </div>
+              )}
 
-          {/* КНОПКА "НАПИСАТЬ" */}
-          <button
-            style={{ marginTop: "10px" }}
-            onClick={() =>
-              window.open(
-                `https://t.me/${listing.username}?text=Интересует объявление: ${listing.title}`,
-                "_blank"
-              )
-            }
-          >
-            Написать продавцу
-          </button>
+              {listing.categories && listing.categories.length > 0 && (
+                <div className="product-details">
+                  Категории:{" "}
+                  {listing.categories
+                    .map(
+                      (catId) => CATEGORY_OPTIONS.find((c) => c.id === catId)?.label,
+                    )
+                    .filter(Boolean)
+                    .join(", ")}
+                </div>
+              )}
 
-          {listing.owner_tg_id === user.id && (
-            <button onClick={() => onDelete(listing.id)}>
-              Удалить
-            </button>
-          )}
+              {listing.description && (
+                <div className="product-details">{listing.description}</div>
+              )}
 
-          {user.id === 410430521 && (
-            <button style={{marginLeft: 10, background: "red", color: "white"}}
-              onClick={() => onDelete(listing.id)}>
-              Удалить (Админ)
-            </button>
-          )}
-        </div>
-      ))}
+              <button
+                type="button"
+                className="product-buy-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openChat(listing);
+                }}
+              >
+                Написать продавцу
+              </button>
+
+              {(isOwner || isAdmin) && (
+                <button
+                  type="button"
+                  style={{
+                    marginTop: 6,
+                    fontSize: 11,
+                    background: isAdmin ? "#e13238" : "#ffffff",
+                    color: isAdmin ? "#ffffff" : "#e13238",
+                    borderRadius: 999,
+                    border: "1px solid #e13238",
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(listing.id);
+                  }}
+                >
+                  {isAdmin ? "Удалить (админ)" : "Удалить"}
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
