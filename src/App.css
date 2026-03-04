@@ -43,23 +43,6 @@
   gap: 8px;
 }
 
-.app-header-cart {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: 2px solid #ffffff;
-  color: #ffffff;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.app-header-cart-icon {
-  font-size: 18px;
-}
-
 .app-main {
   flex: 1;
   background: transparent;
@@ -271,14 +254,6 @@
   font-size: 12px;
   color: #5b6080;
   margin-bottom: 8px;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition:
-    max-height 260ms ease-out,
-    opacity 220ms ease-out,
-    transform 220ms ease-out;
 }
 
 .product-buy-btn {
@@ -462,4 +437,147 @@
 .status-chip-pending {
   background: #fff4d6;
   color: #8a5b00;
+}
+
+/* Статусы пользователя */
+
+.app-header-status {
+  font-size: 12px;
+}
+
+.status-chip-approved {
+  background: #e3f9e5;
+  color: #146c2e;
+}
+
+.status-chip-declined {
+  background: #ffe5e5;
+  color: #b21b1b;
+}
+
+.status-chip-blocked {
+  background: #fde7f0;
+  color: #941b55;
+}
+
+.status-chip-neutral {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* Плашка пустого состояния */
+
+.market-empty-card {
+  margin-top: 8px;
+  padding: 14px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 22, 70, 0.12);
+  text-align: left;
+}
+
+.market-empty-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.market-empty-text {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #5b6080;
+}
+
+/* Бейджи карточки товара */
+
+.product-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 4px;
+}
+
+.product-type-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #eef1ff;
+  color: #1d2c8f;
+}
+
+.product-owner-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: #e7f4ff;
+  color: #005293;
+}
+
+.product-card-owner {
+  box-shadow: 0 14px 34px rgba(20, 60, 130, 0.32);
+  border: 1px solid rgba(39, 73, 255, 0.5);
+}
+
+.product-more-btn {
+  margin-left: 6px;
+  border: none;
+  background: transparent;
+  color: var(--blue-main);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Доп. редактирование фильтров */
+
+.market-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.market-filters-col {
+  min-width: 120px;
+  flex: 1 1 0;
+}
+
+/* Админ-панель */
+
+.admin-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  margin: 4px 0 10px;
+  color: #444866;
+}
+
+.admin-btn {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #c3c6de;
+  background: #ffffff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.admin-btn + .admin-btn {
+  margin-left: 6px;
+}
+
+.admin-btn-danger {
+  border-color: #e13238;
+  color: #e13238;
+}
+
+.admin-btn-danger:hover {
+  background: #e13238;
+  color: #ffffff;
+}
+
+.admin-btn-secondary {
+  border-color: #c3c6de;
+  color: #4b4f6b;
 }

@@ -12,16 +12,41 @@ const CATEGORY_OPTIONS = [
 
 export default function ListingList({ listings, user, onDelete }) {
   const [filterCategories, setFilterCategories] = useState([]);
+  const [filterType, setFilterType] = useState("all");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [expandedIds, setExpandedIds] = useState([]);
+
+  const parsePrice = (price) => {
+    if (!price) return Infinity;
+    const digits = String(price).replace(/[^\d]/g, "");
+    if (!digits) return Infinity;
+    return parseInt(digits, 10);
+  };
 
   // ФИЛЬТРАЦИЯ
   const filteredListings = listings.filter((listing) => {
-    if (!listing.categories) return true;
+    // категории
+    if (filterCategories.length > 0) {
+      const cats = listing.categories || [];
+      const hasMatch = cats.some((c) => filterCategories.includes(c));
+      if (!hasMatch) return false;
+    }
 
-    // если фильтры не выбраны → показать всё
-    if (filterCategories.length === 0) return true;
+    // тип объявления
+    if (filterType !== "all") {
+      if (!listing.type || listing.type !== filterType) return false;
+    }
 
-    // показать если совпадает хотя бы 1 категория
-    return listing.categories.some((c) => filterCategories.includes(c));
+    // цена до
+    if (maxPrice.trim() !== "") {
+      const limit = parseInt(maxPrice, 10);
+      if (!Number.isNaN(limit)) {
+        const priceValue = parsePrice(listing.price);
+        if (priceValue > limit) return false;
+      }
+    }
+
+    return true;
   });
 
   const handleDelete = (id) => {
@@ -47,7 +72,32 @@ export default function ListingList({ listings, user, onDelete }) {
   return (
     <div>
       <div style={{ marginBottom: 10, textAlign: "left" }}>
-        <div className="market-filters-title">Фильтр по категориям</div>
+        <div className="market-filters-title">Фильтры</div>
+        <div className="market-filters-row" style={{ marginBottom: 8 }}>
+          <div className="market-filters-col">
+            <div className="market-filters-label">Тип объявления</div>
+            <select
+              className="form-select"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="all">Все</option>
+              <option value="Продать">Продать</option>
+              <option value="Обменять">Обменять</option>
+            </select>
+          </div>
+          <div className="market-filters-col">
+            <div className="market-filters-label">Цена до (₽)</div>
+            <input
+              type="number"
+              className="form-input"
+              placeholder="Например: 15000"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="market-filters-label">Категории</div>
         <div className="pill-checkbox-row">
           {CATEGORY_OPTIONS.map((cat) => (
             <label key={cat.id} className="pill-checkbox">
@@ -71,7 +121,27 @@ export default function ListingList({ listings, user, onDelete }) {
       </div>
 
       {filteredListings.length === 0 && (
-        <p className="market-empty">Нет объявлений по выбранным фильтрам</p>
+        <div className="market-empty-card">
+          <div className="market-empty-title">Пока нет объявлений</div>
+          <p className="market-empty-text">
+            Попробуй изменить фильтры или создать своё первое объявление.
+          </p>
+          {(filterCategories.length > 0 ||
+            filterType !== "all" ||
+            maxPrice.trim() !== "") && (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                setFilterCategories([]);
+                setFilterType("all");
+                setMaxPrice("");
+              }}
+            >
+              Сбросить фильтры
+            </button>
+          )}
+        </div>
       )}
 
       <div className="market-grid">
@@ -81,13 +151,24 @@ export default function ListingList({ listings, user, onDelete }) {
           const showPendingBadge =
             listing.status === "pending" && listing.owner_tg_id === user.id;
           const priceLabel = listing.price || "Цена по договоренности";
+          const isExpanded = expandedIds.includes(listing.id);
+          const typeLabel = listing.type || "Объявление";
 
           return (
             <div
               key={listing.id}
-              className="product-card"
+              className={`product-card ${
+                isOwner ? "product-card-owner" : ""
+              }`}
               onClick={() => openChat(listing)}
             >
+              <div className="product-badge-row">
+                <span className="product-type-badge">{typeLabel}</span>
+                {isOwner && (
+                  <span className="product-owner-badge">Моё объявление</span>
+                )}
+              </div>
+
               {listing.images && listing.images.length > 0 && (
                 <img
                   className="product-image"
@@ -121,7 +202,27 @@ export default function ListingList({ listings, user, onDelete }) {
               )}
 
               {listing.description && (
-                <div className="product-details">{listing.description}</div>
+                <div className="product-details">
+                  {isExpanded || listing.description.length <= 140
+                    ? listing.description
+                    : `${listing.description.slice(0, 140)}...`}
+                  {listing.description.length > 140 && (
+                    <button
+                      type="button"
+                      className="product-more-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedIds((prev) =>
+                          prev.includes(listing.id)
+                            ? prev.filter((id) => id !== listing.id)
+                            : [...prev, listing.id],
+                        );
+                      }}
+                    >
+                      {isExpanded ? "Свернуть" : "Показать ещё"}
+                    </button>
+                  )}
+                </div>
               )}
 
               <button
@@ -138,16 +239,8 @@ export default function ListingList({ listings, user, onDelete }) {
               {(isOwner || isAdmin) && (
                 <button
                   type="button"
-                  style={{
-                    marginTop: 6,
-                    fontSize: 11,
-                    background: isAdmin ? "#e13238" : "#ffffff",
-                    color: isAdmin ? "#ffffff" : "#e13238",
-                    borderRadius: 999,
-                    border: "1px solid #e13238",
-                    padding: "4px 8px",
-                    cursor: "pointer",
-                  }}
+                  className="admin-btn admin-btn-danger"
+                  style={{ marginTop: 6, fontSize: 11 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(listing.id);

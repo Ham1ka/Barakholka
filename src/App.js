@@ -6,8 +6,8 @@ import ListingList from "./ListingList";
 import { API_BASE } from "./api";
 
 const ADMIN_TG_ID = 410430521;
-// Поставь здесь юзернейм админа, чтобы кнопка "Связаться с админом" работала.
-// Если не знаешь — оставь пустым и кнопка просто покажет id в alert.
+// Поставь здесь юзернейм админа (можно с @).
+// При переходе по ссылке @ автоматически уберётся.
 const ADMIN_USERNAME = "@youarenoname";
 
 function App() {
@@ -204,7 +204,7 @@ function App() {
 
   const deleteListing = (id) => {
     // for owner or admin
-    fetch(`${API_BASE}/listing/${id}`, {
+    fetch(`${API_BASE}/listings/${id}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tg_id: user.id }),
@@ -302,7 +302,12 @@ function App() {
               <button
                 className="btn-primary"
                 type="button"
-                onClick={() => window.open(`https://t.me/${ADMIN_USERNAME}`, "_blank")}
+                onClick={() => {
+                  const uname = ADMIN_USERNAME.startsWith("@")
+                    ? ADMIN_USERNAME.slice(1)
+                    : ADMIN_USERNAME;
+                  window.open(`https://t.me/${uname}`, "_blank");
+                }}
               >
                 Связаться с админом
               </button>
@@ -376,16 +381,38 @@ function App() {
           <div className="app-header-title">
             <span>Барахолка РУТ</span>
           </div>
-          <button className="app-header-cart" type="button">
-            <span className="app-header-cart-icon">🛒</span>
-            <span>Корзина</span>
-          </button>
+          {userStatus && (
+            <div className="app-header-status">
+              <span
+                className={`status-chip ${
+                  userStatus === "approved"
+                    ? "status-chip-approved"
+                    : userStatus === "pending"
+                    ? "status-chip-pending"
+                    : userStatus === "declined"
+                    ? "status-chip-declined"
+                    : userStatus === "blocked"
+                    ? "status-chip-blocked"
+                    : "status-chip-neutral"
+                }`}
+              >
+                Статус:{" "}
+                {userStatus === "approved"
+                  ? "одобрен"
+                  : userStatus === "pending"
+                  ? "на модерации"
+                  : userStatus === "declined"
+                  ? "отклонён"
+                  : userStatus === "blocked"
+                  ? "заблокирован"
+                  : "не определён"}
+              </span>
+            </div>
+          )}
         </header>
 
         <main className="app-main">
           <div className="app-main-inner">
-            <div className="app-debug">Debug: {debugInfo}</div>
-
             {user && (
               <p className="app-greeting">
                 Привет, {user.username || "пользователь"}! (TG ID: {user.id})
@@ -418,6 +445,13 @@ function App() {
               <>
                 <hr className="app-section-separator" />
                 <div>
+                  {debugInfo && (
+                    <div className="app-debug">Debug: {debugInfo}</div>
+                  )}
+                  <div className="admin-stats">
+                    <span>Заявок: {pendingUsers.length}</span>
+                    <span>Объявлений на модерации: {pendingListings.length}</span>
+                  </div>
                   <h2>Admin Panel — Pending Users</h2>
                   {pendingUsers.length === 0 && <p>Нет заявок</p>}
                   <ul>
@@ -439,22 +473,22 @@ function App() {
                         <div style={{ marginTop: 6 }}>
                           <button
                             type="button"
+                            className="admin-btn"
                             onClick={() => approveUser(u.id)}
-                            style={{ marginRight: 8 }}
                           >
                             Approve
                           </button>
                           <button
                             type="button"
+                            className="admin-btn admin-btn-secondary"
                             onClick={() => declineUser(u.id)}
-                            style={{ marginRight: 8 }}
                           >
                             Decline
                           </button>
                           <button
                             type="button"
+                            className="admin-btn admin-btn-danger"
                             onClick={() => blockUser(u.id)}
-                            style={{ marginRight: 8 }}
                           >
                             Block
                           </button>
@@ -493,15 +527,15 @@ function App() {
                         <div>
                           <button
                             type="button"
+                            className="admin-btn"
                             onClick={() => approveListing(l.id)}
-                            style={{ marginRight: 8 }}
                           >
                             Approve
                           </button>
                           <button
                             type="button"
+                            className="admin-btn admin-btn-danger"
                             onClick={() => deleteListing(l.id)}
-                            style={{ marginRight: 8 }}
                           >
                             Delete
                           </button>
@@ -527,10 +561,10 @@ function App() {
         <footer className="app-footer">
           <div className="app-footer-title">Барахолка РУТ</div>
           <p className="app-footer-text">
-            Контакты: укажи здесь ссылку на чат или бота.
+            Контакты: официальный чат или бот барахолки РУТ.
           </p>
           <p className="app-footer-text">
-            Тех. поддержка: добавь {ADMIN_USERNAME || "@username"} администратора.
+            Техподдержка: администратор {ADMIN_USERNAME || "@username"}.
           </p>
         </footer>
       </div>
@@ -565,6 +599,7 @@ function ManageUsersPanel({ adminTg, onBlock, onUnblock, onRefresh }) {
     <div>
       <button
         type="button"
+        className="admin-btn admin-btn-secondary"
         onClick={() => {
           fetchAll();
           onRefresh && onRefresh();
@@ -581,16 +616,16 @@ function ManageUsersPanel({ adminTg, onBlock, onUnblock, onRefresh }) {
               {u.status !== "blocked" ? (
                 <button
                   type="button"
+                  className="admin-btn admin-btn-danger"
                   onClick={() => onBlock(u.id)}
-                  style={{ marginRight: 8 }}
                 >
                   Block
                 </button>
               ) : (
                 <button
                   type="button"
+                  className="admin-btn"
                   onClick={() => onUnblock(u.id)}
-                  style={{ marginRight: 8 }}
                 >
                   Unblock
                 </button>
