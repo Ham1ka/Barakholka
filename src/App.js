@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./App.css";
 import Register from "./Register";
 import CreateListing from "./CreateListing";
@@ -20,7 +20,7 @@ function App() {
   const [pendingListings, setPendingListings] = useState([]);
 
   // Получаем ленту (с учётом tg_id, чтобы бэкенд фильтровал по dorm)
-  const fetchListings = () => {
+  const fetchListings = useCallback(() => {
     if (!user) return;
     fetch(`${API_BASE}/listings?tg_id=${user.id}`)
       .then((res) => {
@@ -33,10 +33,10 @@ function App() {
       })
       .then((data) => setListings(data))
       .catch((err) => setDebugInfo(`Ошибка listings: ${err.message}`));
-  };
+  }, [user]);
 
   // Проверка/регистрация пользователя (возвращает статус)
-  const fetchUserStatus = async () => {
+  const fetchUserStatus = useCallback(async () => {
     if (!user) return;
     const formData = new FormData();
     formData.append("tg_id", user.id);
@@ -59,10 +59,10 @@ function App() {
       setDebugInfo(`Ошибка status: ${err.message}`);
       setUserStatus("not_registered");
     }
-  };
+  }, [user]);
 
   // Admin: pending users
-  const fetchPending = () => {
+  const fetchPending = useCallback(() => {
     if (!user) return;
     fetch(`${API_BASE}/admin/pending?tg_id=${user.id}`)
       .then((res) => {
@@ -75,10 +75,10 @@ function App() {
       })
       .then((data) => setPendingUsers(data))
       .catch((err) => setDebugInfo(`Admin error: ${err.message}`));
-  };
+  }, [user]);
 
   // Admin: pending listings
-  const fetchPendingListings = () => {
+  const fetchPendingListings = useCallback(() => {
     if (!user) return;
     fetch(`${API_BASE}/admin/pending_listings?tg_id=${user.id}`)
       .then((res) => {
@@ -91,7 +91,7 @@ function App() {
       })
       .then((data) => setPendingListings(data))
       .catch((err) => setDebugInfo(`Pending listings error: ${err.message}`));
-  };
+  }, [user]);
 
   // Admin actions for users
   const approveUser = (id) => {
@@ -263,7 +263,7 @@ function App() {
       fetchUserStatus();
       fetchListings();
     }
-  }, [user]);
+  }, [user, fetchUserStatus, fetchListings]);
 
   // Если админ — подгружаем страницы модерации
   useEffect(() => {
@@ -271,7 +271,7 @@ function App() {
       fetchPending();
       fetchPendingListings();
     }
-  }, [user]);
+  }, [user, fetchPending, fetchPendingListings]);
 
   const isApproved = user && userStatus === "approved";
 
@@ -543,7 +543,7 @@ function ManageUsersPanel({ adminTg, onBlock, onUnblock, onRefresh }) {
   const [users, setUsers] = useState([]);
   const [debug, setDebug] = useState("");
 
-  const fetchAll = () => {
+  const fetchAll = useCallback(() => {
     fetch(`${API_BASE}/admin/all_users?tg_id=${adminTg}`)
       .then((res) => {
         if (!res.ok) {
@@ -555,11 +555,11 @@ function ManageUsersPanel({ adminTg, onBlock, onUnblock, onRefresh }) {
       })
       .then((data) => setUsers(data))
       .catch((err) => setDebug(`Fetch users err: ${err.message}`));
-  };
+  }, [adminTg]);
 
   useEffect(() => {
     fetchAll();
-  }, []);
+  }, [fetchAll]);
 
   return (
     <div>
