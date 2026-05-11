@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1320" viewBox="0 0 1800 1320" fill="none">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#101828" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#344054"/>
+    </marker>
+    <style>
+      .label { font-family: Arial, Inter, sans-serif; fill: #344054; font-size: 19px; font-weight: 500; }
+      .small { font-family: Arial, Inter, sans-serif; fill: #667085; font-size: 16px; font-weight: 500; }
+      .box-title { font-family: Arial, Inter, sans-serif; fill: #101828; font-size: 22px; font-weight: 700; }
+      .box-text { font-family: Arial, Inter, sans-serif; fill: #101828; font-size: 18px; font-weight: 600; }
+      .proc-num { font-family: Arial, Inter, sans-serif; fill: #101828; font-size: 18px; font-weight: 700; }
+      .proc-title { font-family: Arial, Inter, sans-serif; fill: #101828; font-size: 17px; font-weight: 700; }
+      .caption { font-family: Arial, Inter, sans-serif; fill: #101828; font-size: 26px; font-weight: 700; }
+      .flow { stroke: #344054; stroke-width: 3; fill: none; marker-end: url(#arrow); stroke-linecap: round; stroke-linejoin: round; }
+      .box { rx: 24; ry: 24; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="1800" height="1320" fill="#F7F9FC"/>
+  <text x="900" y="56" text-anchor="middle" class="box-title">Диаграмма потоков данных мини-приложения «Барахолка»</text>
+  <text x="900" y="84" text-anchor="middle" class="small">DFD верхнего уровня (в стиле нотации Гейна–Сарсона)</text>
+
+<rect x="60" y="145" width="190" height="92" rx="22" fill="#FFF4D6" stroke="#D97706" stroke-width="3" filter="url(#shadow)"/>
+<text x="155" y="191.0" text-anchor="middle" dominant-baseline="middle" class="box-title">Студент</text>
+<rect x="1515" y="145" width="225" height="92" rx="22" fill="#FFF4D6" stroke="#D97706" stroke-width="3" filter="url(#shadow)"/>
+<text x="1627.5" y="191.0" text-anchor="middle" dominant-baseline="middle" class="box-title">Администратор</text>
+<rect x="1490" y="720" width="250" height="100" rx="22" fill="#FFF4D6" stroke="#D97706" stroke-width="3" filter="url(#shadow)"/>
+<text x="1615" y="759.0" text-anchor="middle" dominant-baseline="middle" class="box-title">Внешний аккаунт</text>
+<text x="1615" y="781.0" text-anchor="middle" dominant-baseline="middle" class="box-title">продавца</text>
+<rect x="590" y="120" width="200" height="110" rx="22" fill="#EAF2FF" stroke="#3B82F6" stroke-width="3" filter="url(#shadow)"/>
+<text x="690" y="148.0" text-anchor="middle" dominant-baseline="middle" class="proc-num">0.1</text>
+<text x="690" y="171.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">Регистрация и</text>
+<text x="690" y="195.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">отправка данных</text>
+<rect x="590" y="285" width="200" height="110" rx="22" fill="#EAF2FF" stroke="#3B82F6" stroke-width="3" filter="url(#shadow)"/>
+<text x="690" y="313.0" text-anchor="middle" dominant-baseline="middle" class="proc-num">0.2</text>
+<text x="690" y="336.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">Проверка</text>
+<text x="690" y="360.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">студента</text>
+<rect x="590" y="450" width="200" height="110" rx="22" fill="#EAF2FF" stroke="#3B82F6" stroke-width="3" filter="url(#shadow)"/>
+<text x="690" y="478.0" text-anchor="middle" dominant-baseline="middle" class="proc-num">0.3</text>
+<text x="690" y="501.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">Публикация</text>
+<text x="690" y="525.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">объявления</text>
+<rect x="590" y="615" width="200" height="110" rx="22" fill="#EAF2FF" stroke="#3B82F6" stroke-width="3" filter="url(#shadow)"/>
+<text x="690" y="643.0" text-anchor="middle" dominant-baseline="middle" class="proc-num">0.4</text>
+<text x="690" y="666.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">Поиск и</text>
+<text x="690" y="690.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">фильтрация</text>
+<rect x="590" y="780" width="200" height="110" rx="22" fill="#EAF2FF" stroke="#3B82F6" stroke-width="3" filter="url(#shadow)"/>
+<text x="690" y="808.0" text-anchor="middle" dominant-baseline="middle" class="proc-num">0.5</text>
+<text x="690" y="831.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">Просмотр карточки</text>
+<text x="690" y="855.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">объявления</text>
+<rect x="590" y="945" width="200" height="110" rx="22" fill="#EAF2FF" stroke="#3B82F6" stroke-width="3" filter="url(#shadow)"/>
+<text x="690" y="973.0" text-anchor="middle" dominant-baseline="middle" class="proc-num">0.6</text>
+<text x="690" y="996.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">Переход к</text>
+<text x="690" y="1020.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">продавцу</text>
+<rect x="590" y="1110" width="200" height="110" rx="22" fill="#EAF2FF" stroke="#3B82F6" stroke-width="3" filter="url(#shadow)"/>
+<text x="690" y="1138.0" text-anchor="middle" dominant-baseline="middle" class="proc-num">0.7</text>
+<text x="690" y="1161.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">Модерация</text>
+<text x="690" y="1185.0" text-anchor="middle" dominant-baseline="middle" class="proc-title">объявлений</text>
+<rect x="1160" y="120" width="56" height="54" rx="12" fill="#F3EEFF" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<text x="1188" y="147" text-anchor="middle" dominant-baseline="middle" class="box-text">D1</text>
+<rect x="1216" y="110" width="250" height="74" rx="18" fill="white" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<line x1="1234" y1="110" x2="1234" y2="184" stroke="#7C3AED" stroke-width="3"/>
+<text x="1341" y="147.0" text-anchor="middle" dominant-baseline="middle" class="box-text">Профили студентов</text>
+<rect x="1160" y="210" width="56" height="54" rx="12" fill="#F3EEFF" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<text x="1188" y="237" text-anchor="middle" dominant-baseline="middle" class="box-text">D2</text>
+<rect x="1216" y="200" width="250" height="74" rx="18" fill="white" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<line x1="1234" y1="200" x2="1234" y2="274" stroke="#7C3AED" stroke-width="3"/>
+<text x="1341" y="226.0" text-anchor="middle" dominant-baseline="middle" class="box-text">Заявки на</text>
+<text x="1341" y="248.0" text-anchor="middle" dominant-baseline="middle" class="box-text">верификацию</text>
+<rect x="1160" y="310" width="56" height="54" rx="12" fill="#F3EEFF" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<text x="1188" y="337" text-anchor="middle" dominant-baseline="middle" class="box-text">D1</text>
+<rect x="1216" y="300" width="250" height="74" rx="18" fill="white" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<line x1="1234" y1="300" x2="1234" y2="374" stroke="#7C3AED" stroke-width="3"/>
+<text x="1341" y="337.0" text-anchor="middle" dominant-baseline="middle" class="box-text">Профили студентов</text>
+<rect x="1160" y="490" width="56" height="54" rx="12" fill="#F3EEFF" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<text x="1188" y="517" text-anchor="middle" dominant-baseline="middle" class="box-text">D3</text>
+<rect x="1216" y="480" width="250" height="74" rx="18" fill="white" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<line x1="1234" y1="480" x2="1234" y2="554" stroke="#7C3AED" stroke-width="3"/>
+<text x="1341" y="517.0" text-anchor="middle" dominant-baseline="middle" class="box-text">Объявления</text>
+<rect x="1160" y="595" width="56" height="54" rx="12" fill="#F3EEFF" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<text x="1188" y="622" text-anchor="middle" dominant-baseline="middle" class="box-text">D4</text>
+<rect x="1216" y="585" width="250" height="74" rx="18" fill="white" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<line x1="1234" y1="585" x2="1234" y2="659" stroke="#7C3AED" stroke-width="3"/>
+<text x="1341" y="611.0" text-anchor="middle" dominant-baseline="middle" class="box-text">Категории и</text>
+<text x="1341" y="633.0" text-anchor="middle" dominant-baseline="middle" class="box-text">фильтры</text>
+<rect x="1160" y="770" width="56" height="54" rx="12" fill="#F3EEFF" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<text x="1188" y="797" text-anchor="middle" dominant-baseline="middle" class="box-text">D3</text>
+<rect x="1216" y="760" width="250" height="74" rx="18" fill="white" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<line x1="1234" y1="760" x2="1234" y2="834" stroke="#7C3AED" stroke-width="3"/>
+<text x="1341" y="797.0" text-anchor="middle" dominant-baseline="middle" class="box-text">Объявления</text>
+<rect x="1160" y="1050" width="56" height="54" rx="12" fill="#F3EEFF" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<text x="1188" y="1077" text-anchor="middle" dominant-baseline="middle" class="box-text">D5</text>
+<rect x="1216" y="1040" width="250" height="74" rx="18" fill="white" stroke="#7C3AED" stroke-width="3" filter="url(#shadow)"/>
+<line x1="1234" y1="1040" x2="1234" y2="1114" stroke="#7C3AED" stroke-width="3"/>
+<text x="1341" y="1066.0" text-anchor="middle" dominant-baseline="middle" class="box-text">Жалобы и</text>
+<text x="1341" y="1088.0" text-anchor="middle" dominant-baseline="middle" class="box-text">модерация</text>
+<path d="M 155 237 L 155 1130" class="flow"/>
+<path d="M 250 191 L 590 191" class="flow"/>
+<text x="414" y="160" text-anchor="middle" class="label">
+<tspan x="414" dy="0">Номер телефона,</tspan>
+<tspan x="414" dy="22">фото пропуска</tspan>
+</text>
+<path d="M 790 160 L 1160 160" class="flow"/>
+<text x="965" y="138" text-anchor="middle" class="label">Данные профиля</text>
+<path d="M 790 205 L 1100 205 L 1100 237 L 1160 237" class="flow"/>
+<text x="960" y="194" text-anchor="middle" class="label">Заявка на проверку</text>
+<path d="M 1160 245 L 1030 245 L 1030 285 L 690 285" class="flow"/>
+<text x="885" y="275" text-anchor="middle" class="label">Заявки студентов</text>
+<path d="M 1515 191 L 1340 191 L 1340 340 L 790 340" class="flow"/>
+<text x="1120" y="323" text-anchor="middle" class="label">Решение: одобрить / отклонить</text>
+<path d="M 790 340 L 1160 340" class="flow"/>
+<text x="965" y="318" text-anchor="middle" class="label">Статус проверки</text>
+<path d="M 590 340 L 155 340" class="flow"/>
+<text x="350" y="318" text-anchor="middle" class="label">Уведомление о результате</text>
+<path d="M 155 385 L 155 505 L 590 505" class="flow"/>
+<text x="385" y="448" text-anchor="middle" class="label">
+<tspan x="385" dy="0">Данные объявления:</tspan>
+<tspan x="385" dy="22">название, описание,</tspan>
+<tspan x="385" dy="22">цена, фото, категория</tspan>
+</text>
+<path d="M 1160 337 L 1080 337 L 1080 490 L 790 490" class="flow"/>
+<text x="950" y="470" text-anchor="middle" class="label">Статус верификации</text>
+<path d="M 790 505 L 1160 505" class="flow"/>
+<text x="965" y="483" text-anchor="middle" class="label">Новое объявление</text>
+<path d="M 590 530 L 155 530" class="flow"/>
+<text x="355" y="515" text-anchor="middle" class="label">Подтверждение публикации</text>
+<path d="M 155 590 L 590 670" class="flow"/>
+<text x="345" y="598" text-anchor="middle" class="label">
+<tspan x="345" dy="0">Запрос списка</tspan>
+<tspan x="345" dy="22">с фильтрами</tspan>
+</text>
+<path d="M 1160 622 L 790 622" class="flow"/>
+<text x="965" y="600" text-anchor="middle" class="label">
+<tspan x="965" dy="0">Категории, параметры</tspan>
+<tspan x="965" dy="22">фильтрации</tspan>
+</text>
+<path d="M 1160 515 L 1100 515 L 1100 650 L 790 650" class="flow"/>
+<text x="945" y="640" text-anchor="middle" class="label">Список объявлений</text>
+<path d="M 590 695 L 155 695" class="flow"/>
+<text x="350" y="680" text-anchor="middle" class="label">Подходящие объявления</text>
+<path d="M 155 760 L 590 835" class="flow"/>
+<text x="340" y="765" text-anchor="middle" class="label">
+<tspan x="340" dy="0">Запрос карточки</tspan>
+<tspan x="340" dy="22">объявления</tspan>
+</text>
+<path d="M 1160 797 L 790 797" class="flow"/>
+<text x="965" y="775" text-anchor="middle" class="label">Данные объявления</text>
+<path d="M 1160 337 L 1050 337 L 1050 845 L 790 845" class="flow"/>
+<text x="935" y="860" text-anchor="middle" class="label">Данные продавца</text>
+<path d="M 590 860 L 155 860" class="flow"/>
+<text x="365" y="845" text-anchor="middle" class="label">
+<tspan x="365" dy="0">Карточка объявления</tspan>
+<tspan x="365" dy="22">и ссылка продавца</tspan>
+</text>
+<path d="M 155 935 L 590 1000" class="flow"/>
+<text x="345" y="932" text-anchor="middle" class="label">
+<tspan x="345" dy="0">Нажатие на ссылку</tspan>
+<tspan x="345" dy="22">для связи</tspan>
+</text>
+<path d="M 790 1000 L 1490 1000 L 1490 770" class="flow"/>
+<text x="1140" y="985" text-anchor="middle" class="label">Переход во внешний профиль</text>
+<path d="M 1628 237 L 1628 1080 L 790 1080" class="flow"/>
+<text x="1450" y="1015" text-anchor="middle" class="label">
+<tspan x="1450" dy="0">Проверка жалоб</tspan>
+<tspan x="1450" dy="22">и объявлений</tspan>
+</text>
+<path d="M 1160 797 L 1090 797 L 1090 1100 L 790 1100" class="flow"/>
+<text x="965" y="1090" text-anchor="middle" class="label">Объявления для проверки</text>
+<path d="M 1160 1077 L 790 1077" class="flow"/>
+<text x="965" y="1055" text-anchor="middle" class="label">Жалобы пользователей</text>
+<path d="M 790 1135 L 1040 1135 L 1040 835 L 1160 835" class="flow"/>
+<text x="1000" y="1118" text-anchor="middle" class="label">Решение модерации</text>
+<path d="M 590 1135 L 155 1135" class="flow"/>
+<text x="360" y="1112" text-anchor="middle" class="label">
+<tspan x="360" dy="0">Уведомление о блокировке</tspan>
+<tspan x="360" dy="22">или изменении статуса</tspan>
+</text>
+<text x="900" y="1272" text-anchor="middle" class="caption">Рис. Диаграмма потоков данных мини-приложения «Барахолка» верхнего уровня</text>
+<text x="900" y="1300" text-anchor="middle" class="small">SVG-файл подходит для импорта и редактирования в Figma</text>
+</svg>

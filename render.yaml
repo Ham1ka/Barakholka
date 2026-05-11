@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: baraholka-vk
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm --prefix backend install && npm run build
+    startCommand: npm --prefix backend start
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.2
+      - key: ADMIN_VK_ID
+        sync: false
+      - key: DATA_DIR
+        value: /opt/render/project/src/backend/data

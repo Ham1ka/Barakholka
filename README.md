@@ -1,70 +1,84 @@
-# Getting Started with Create React App
+# Barakholka VK Mini App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Мини-приложение для студенческой барахолки во `VK Mini Apps`. Внутри уже перенесены:
 
-## Available Scripts
+- регистрация по номеру телефона и фото пропуска студента общежития
+- модерация пользователей админом
+- создание объявлений с фото
+- фильтры по поиску, типу, категории и своему общежитию
+- карточка товара со ссылкой на личный профиль продавца во VK
+- админская модерация объявлений
 
-In the project directory, you can run:
+## Структура
 
-### `npm start`
+- `src/` — фронтенд на React
+- `backend/` — Express + SQLite API
+- `backend/uploads/` — загруженные фото пропусков и товаров
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Что уже изменено
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Telegram WebApp-логика убрана
+- фронтенд инициализируется через `VK Bridge`
+- добавлен локальный browser-режим для разработки, если приложение открыто вне VK
+- бэкенд переведён на `vk_user_id`
 
-### `npm test`
+## Что нужно для запуска
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+На этой машине у меня не оказался установлен `Node.js`, поэтому код я подготовил, но локально не запускал. Для старта у тебя должен быть установлен Node.js LTS.
 
-### `npm run build`
+## Локальный запуск
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Запусти бэкенд:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```powershell
+cd backend
+$env:ADMIN_VK_ID="ТВОЙ_VK_ID"
+npm install
+node server.js
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. В другом окне запусти фронтенд:
 
-### `npm run eject`
+```powershell
+cd ..
+npm install
+npm start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. Если API будет не на `http://localhost:3000`, задай переменную:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```powershell
+$env:REACT_APP_API_BASE="http://localhost:3000/api"
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Как работает авторизация сейчас
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Внутри VK приложение пытается получить пользователя через `VKWebAppGetUserInfo`
+- В обычном браузере включается локальный mock-режим, чтобы можно было верстать и проверять сценарии без кабинета VK
 
-## Learn More
+## Что настроить в VK с нуля
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Создать приложение в кабинете `VK Mini Apps`
+2. Получить `App ID`
+3. Указать URL фронтенда после деплоя
+4. Добавить домен фронтенда в разрешённые
+5. Поднять HTTPS для фронтенда и API
+6. Прописать свой реальный `VK ID` в `ADMIN_VK_ID`, чтобы открыть админ-панель
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Основные API
 
-### Code Splitting
+- `POST /api/register`
+- `GET /api/user_status?vk_user_id=...`
+- `GET /api/listings?vk_user_id=...`
+- `POST /api/listings`
+- `DELETE /api/listings/:id`
+- `GET /api/admin/pending?vk_user_id=...`
+- `POST /api/admin/approve/:id?vk_user_id=...`
+- `GET /api/admin/pending_listings?vk_user_id=...`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Что я бы сделал следующим шагом
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- подключил реальный `VK App ID` и проверил запуск прямо внутри VK
+- вынес адрес API и admin id в отдельные env-файлы
+- добавил отдельный экран карточки товара
+- добавил подтверждение удаления и более удобную модерацию

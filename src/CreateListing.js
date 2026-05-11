@@ -1,97 +1,152 @@
 import React, { useState } from "react";
-import { API_BASE } from "./api";
+import { createListing } from "./api";
+import { CATEGORIES, LISTING_TYPES } from "./constants";
 
-export default function CreateListing({ onCreate }) {
-  const [userId, setUserId] = useState("1"); // пример: подтверждённый юзер
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState("Продать");
-  const [price, setPrice] = useState("");
-  const [photos, setPhotos] = useState([]);
+function CreateListing({ viewer, onCreated }) {
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    type: LISTING_TYPES[0],
+    price: "",
+    category: CATEGORIES[0],
+    photos: [],
+  });
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!userId || !title || !description) {
-      setMessage("Заполните все обязательные поля!");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("userId", userId);
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("type", type);
-    formData.append("price", price);
-    for (let i = 0; i < photos.length; i++) {
-      formData.append("photos", photos[i]);
-    }
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    setMessage("");
 
     try {
-      const res = await fetch(`${API_BASE}/listings`, {
-        method: "POST",
-        body: formData,
+      const response = await createListing(viewer.id, form);
+      setMessage(response.message || "Объявление отправлено.");
+      setForm({
+        title: "",
+        description: "",
+        type: LISTING_TYPES[0],
+        price: "",
+        category: CATEGORIES[0],
+        photos: [],
       });
-      const data = await res.json();
-      console.log("Ответ сервера:", data);
-      setMessage(data.message);
-
-      // 🔥 обновляем ленту объявлений
-      if (onCreate) onCreate();
-
-      // чистим форму
-      setTitle("");
-      setDescription("");
-      setPrice("");
-      setPhotos([]);
-    } catch (err) {
-      console.error("Ошибка при отправке:", err);
-      setMessage("Ошибка при создании объявления");
+      await onCreated();
+    } catch (submitError) {
+      setError(submitError.message);
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div>
-      <h2>Создать объявление</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="User ID"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Заголовок"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-        <textarea
-          placeholder="Описание"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option>Продать</option>
-          <option>Обменять</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Цена"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-        />
-        <input
-          type="file"
-          multiple
-          onChange={(e) => setPhotos(e.target.files)}
-        />
-        <button type="submit">Создать</button>
+    <section className="panel">
+      <div className="section-head">
+        <div>
+          <h2>Новое объявление</h2>
+          <p className="muted">
+            После отправки объявление попадёт на модерацию. Добавь до 4 фото и выбери
+            категорию, чтобы его было проще найти.
+          </p>
+        </div>
+      </div>
+
+      <form className="stack-form" onSubmit={handleSubmit}>
+        <label>
+          <span>Заголовок</span>
+          <input
+            value={form.title}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, title: event.target.value }))
+            }
+            placeholder="Например, продаю настольную лампу"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Описание</span>
+          <textarea
+            rows="4"
+            value={form.description}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, description: event.target.value }))
+            }
+            placeholder="Состояние, размеры, что входит в комплект"
+            required
+          />
+        </label>
+
+        <div className="form-grid">
+          <label>
+            <span>Тип</span>
+            <select
+              value={form.type}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, type: event.target.value }))
+              }
+            >
+              {LISTING_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            <span>Категория</span>
+            <select
+              value={form.category}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, category: event.target.value }))
+              }
+            >
+              {CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>Цена</span>
+          <input
+            value={form.price}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, price: event.target.value }))
+            }
+            placeholder="Например, 1500"
+          />
+        </label>
+
+        <label>
+          <span>Фото товара</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                photos: Array.from(event.target.files || []).slice(0, 4),
+              }))
+            }
+          />
+        </label>
+
+        <button type="submit" className="primary-button" disabled={loading}>
+          {loading ? "Отправляем..." : "Создать объявление"}
+        </button>
       </form>
-      {message && <p>{message}</p>}
-    </div>
+
+      {message ? <p className="success-text">{message}</p> : null}
+      {error ? <p className="error-text">{error}</p> : null}
+    </section>
   );
 }
+
+export default CreateListing;

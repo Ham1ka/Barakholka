@@ -2,7 +2,11 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.22.0 <23"
+  },
   "dependencies": {
+    "@vkontakte/vk-bridge": "^2.15.9",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -15,9 +19,11 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:full": "npm run build && npm --prefix backend install",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:3000",
   "eslintConfig": {
     "extends": [
       "react-app",
