@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/backend/node_modules
 /.pnp
 .pnp.js
 
@@ -10,10 +11,14 @@
 
 # production
 /build
+/backend/data
+/backend/uploads
+/backend/dormswap.db
 
 # misc
 .DS_Store
 .env.local
+.env.development
 .env.development.local
 .env.test.local
 .env.production.local
